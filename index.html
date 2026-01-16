@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>lucu</title>
+
+<style>
+body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#2a1a10,#3b2618);
+    font-family:Georgia, serif;
+    color:#f5e6c8;
+}
+
+.card{
+    width:340px;
+    background:#1b1009;
+    border:2px solid #c9a24d;
+    border-radius:20px;
+    padding:18px;
+    box-shadow:0 0 30px rgba(201,162,77,0.4);
+}
+
+/* FOTO */
+.photo-frame{
+    position:relative;
+    border:3px solid #c9a24d;
+    border-radius:16px;
+    overflow:hidden;
+    margin-bottom:15px;
+}
+
+.photo-frame img{
+    width:100%;
+    display:block;
+}
+
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+/* LIRIK */
+.lyrics{
+    min-height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:10px;
+    border:1px solid #c9a24d;
+    border-radius:12px;
+    background:rgba(255,215,150,0.08);
+    margin-bottom:14px;
+    font-size:15px;
+}
+
+/* TOMBOL */
+button{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#c9a24d,#f5e6c8);
+    color:#2a1a10;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{ opacity:0.9; }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- FOTO -->
+    <div class="photo-frame">
+        <img src="IMG_20260116_173406.jpg" id="photo">
+        <canvas id="pixelCanvas"></canvas>
+    </div>
+
+    <!-- LIRIK -->
+    <div class="lyrics" id="lyricsBox">
+        Tekan play lalu usap foto ✨
+    </div>
+
+    <!-- AUDIO -->
+    <audio id="audio" src="ec26ecedad40.mp3"></audio>
+
+    <button onclick="playSong()">▶ Play Lagu</button>
+</div>
+
+<script>
+/* ===== LIRIK (8 BARIS, JEDA BEDA) ===== */
+const lyrics = [
+  { text:"'Cause there is something, and there is nothing there is nothing in between", delay:7700 },
+  { text:"and in my eyes, there is a tiny dancer watching over me, ", delay:7700 },
+  { text:"he's singing she's a, she's a lady, and I am just a boy", delay:8000 },
+  { text:"he's singing she's a, she's a lady, and I am just a line without a hook", delay:8500 },
+  { text:"Oh, baby, I am a wreck when I'm without you I need you here to stay", delay:7700 },
+  { text:"Broke all my bones that day I found you crying at the lake", delay:7500 },
+  { text:"Was it something I said to make you feel like you're a burden? ", delay:7300 },
+  { text:"Oh and if I could take it all back I swear that I would pull you from the tide", delay:7500 }
+];
+
+let i = 0;
+let timer;
+
+function playSong(){
+    const audio = document.getElementById("audio");
+    const box = document.getElementById("lyricsBox");
+
+    audio.currentTime = 0;
+    audio.play();
+
+    i = 0;
+    clearTimeout(timer);
+    showLyrics();
+
+    function showLyrics(){
+        if(i >= lyrics.length) return;
+        box.innerText = lyrics[i].text;
+        timer = setTimeout(()=>{
+            i++;
+            showLyrics();
+        }, lyrics[i].delay);
+    }
+}
+
+/* ===== PIXEL REVEAL FOTO ===== */
+const canvas = document.getElementById("pixelCanvas");
+const ctx = canvas.getContext("2d");
+const img = document.getElementById("photo");
+
+let drawing = false;
+
+img.onload = () => {
+    canvas.width = img.clientWidth;
+    canvas.height = img.clientHeight;
+    ctx.fillStyle = "#1b1009";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+};
+
+/* MOUSE */
+canvas.addEventListener("mousedown", ()=> drawing = true);
+canvas.addEventListener("mouseup", ()=> drawing = false);
+canvas.addEventListener("mousemove", drawMouse);
+
+/* TOUCH (HP) */
+canvas.addEventListener("touchstart", (e)=>{
+    drawing = true;
+    e.preventDefault();
+});
+canvas.addEventListener("touchend", ()=> drawing = false);
+canvas.addEventListener("touchmove", drawTouch);
+
+function drawMouse(e){
+    if(!drawing) return;
+    const r = canvas.getBoundingClientRect();
+    ctx.clearRect(e.clientX-r.left-12, e.clientY-r.top-12, 24, 24);
+}
+
+function drawTouch(e){
+    if(!drawing) return;
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    ctx.clearRect(t.clientX-r.left-12, t.clientY-r.top-24, 48, 48);
+}
+</script>
+
+</body>
+</html>
